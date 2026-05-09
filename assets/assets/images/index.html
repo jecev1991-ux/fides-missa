@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0D1F1A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Fides Missa">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Fides Missa</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lora:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0D1F1A;--bg2:#152820;--bg3:#1C3328;
+  --gold:#D4B86A;--gold-dark:#8B6914;--gold-dim:#4A3010;
+  --teal:#2ABFA0;--teal-dark:#1A7A68;
+  --text:#B89A60;--text2:#9A8050;--text3:#5A4030;
+  --border:#2A2000;--border2:#2A3010;--wpp:#25D366;
+  --ff-t:'Cinzel',serif;--ff-b:'Lora',serif;--fs:15px;
+  --hdr:#0A1610;--sec-hdr:#152820;--blk-border:#1C2A20;
+  --cal-hoje:#D4B86A;--cal-hoje-c:#0D1F1A;--cal-dom:#EAC84A;
+}
+body.light{
+  --bg:#F5F0E8;--bg2:#EDE5D5;--bg3:#E5D8C0;
+  --gold:#7A5A10;--gold-dark:#5A4008;--gold-dim:#A08040;
+  --teal:#1A7A68;--teal-dark:#0D5A4A;
+  --text:#3A2A10;--text2:#5A4020;--text3:#8A7050;
+  --border:#C8B890;--border2:#C0A870;
+  --hdr:#EDE5D5;--sec-hdr:#EDE5D5;--blk-border:#D8CAA8;
+  --cal-hoje:#7A5A10;--cal-hoje-c:#F5F0E8;--cal-dom:#9A2A10;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:var(--bg);transition:background .3s,color .3s}
+body{font-family:var(--ff-b);color:var(--text);display:flex;flex-direction:column}
+#app{display:flex;flex-direction:column;height:100%;max-width:430px;margin:0 auto;width:100%}
+
+/* HEADER */
+.hdr{background:var(--hdr);padding:env(safe-area-inset-top,10px) 12px 10px;display:flex;align-items:center;gap:6px;border-bottom:.5px solid var(--border);flex-shrink:0;transition:background .3s}
+.logo-box{width:38px;height:38px;background:var(--bg3);border:1.5px solid var(--gold);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 14px rgba(212,184,106,.2)}
+.logo-box span{font-family:var(--ff-t);color:var(--gold);font-size:22px;font-weight:700}
+.logo-text{flex:1}
+.logo-text h1{font-family:var(--ff-t);color:var(--gold);font-size:15px;font-weight:700;letter-spacing:2px}
+.logo-text p{color:var(--text3);font-size:8px;letter-spacing:2px;margin-top:1px}
+.hbtn{background:var(--bg2);border:.5px solid var(--border);border-radius:7px;padding:5px 8px;cursor:pointer;color:var(--gold);font-family:var(--ff-b);font-size:12px;user-select:none;flex-shrink:0}
+.hbtn:active{background:var(--bg3)}
+
+/* DATEBAR */
+.datebar{background:var(--bg2);padding:7px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:.5px solid var(--border);flex-shrink:0;transition:background .3s}
+.datebar-d{color:var(--text2);font-size:10px}
+.badge{background:var(--bg3);border:.5px solid var(--border2);border-radius:12px;padding:3px 9px}
+.badge span{color:var(--gold);font-size:9px;font-family:var(--ff-b)}
+
+/* TABS */
+.tabs{background:var(--hdr);display:flex;overflow-x:auto;border-bottom:.5px solid var(--border);flex-shrink:0;-webkit-overflow-scrolling:touch;transition:background .3s}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;padding:10px 13px;cursor:pointer;color:var(--text3);font-family:var(--ff-b);font-size:11px;border-bottom:2px solid transparent;white-space:nowrap;user-select:none;transition:color .2s}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.content::-webkit-scrollbar{width:3px}
+.content::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.screen{display:none;animation:fu .3s ease}.screen.active{display:block}
+@keyframes fu{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* SEÇÃO */
+.sh{background:var(--sec-hdr);border-top:.5px solid var(--border);border-bottom:.5px solid var(--border);padding:10px 14px;display:flex;align-items:center;gap:10px;transition:background .3s}
+.si{background:var(--bg3);border:.5px solid var(--border2);border-radius:8px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:17px}
+.st{font-family:var(--ff-t);font-size:10px;font-weight:700;letter-spacing:1.5px}
+.ss{font-family:var(--ff-b);color:var(--text3);font-size:10px;margin-top:1px}
+
+/* BLOCO */
+.blk{padding:15px;border-bottom:.5px solid var(--blk-border);background:var(--bg);transition:background .3s}
+
+/* TEXTO */
+.txt{font-family:var(--ff-b);color:var(--text);line-height:1.95;font-size:var(--fs)}
+.txt p{margin-bottom:12px}.txt p:last-child{margin-bottom:0}
+.txt strong{color:var(--gold);font-weight:600}
+.txt em{color:var(--text2);font-style:italic}
+.txt .ref{font-family:var(--ff-t);color:var(--gold-dark);font-size:calc(var(--fs) - 3px);letter-spacing:1px;display:block;margin-bottom:10px}
+.txt .intro{font-style:italic;color:var(--text2)}
+
+.div{display:flex;align-items:center;gap:8px;margin:12px 0}
+.div::before,.div::after{content:'';flex:1;height:.5px;background:var(--border)}
+.div span{color:var(--gold-dim);font-size:10px}
+
+.antif{background:var(--bg3);border-left:2.5px solid var(--gold);border-radius:0 7px 7px 0;padding:9px 13px;margin:10px 0;transition:background .3s}
+.antif p{font-family:var(--ff-b);color:var(--gold);font-style:italic;font-weight:600;line-height:1.6;font-size:calc(var(--fs) - 1px)}
+
+.psenhor{font-family:var(--ff-b);color:var(--gold);font-style:italic;font-weight:600;text-align:right;margin-top:12px;font-size:var(--fs)}
+.amen{font-family:var(--ff-t);color:var(--gold);font-size:13px;font-weight:700;text-align:right;margin-top:10px}
+
+/* SALMO */
+.srbox{background:var(--bg3);border:.5px solid var(--teal-dark);border-radius:8px;padding:12px;margin-bottom:14px;transition:background .3s}
+.slbl{font-size:8px;color:var(--teal);letter-spacing:2px;margin-bottom:4px;font-family:var(--ff-b)}
+.sr{font-family:var(--ff-b);color:var(--gold);font-size:calc(var(--fs) + 1px);font-weight:600;font-style:italic;line-height:1.6}
+.sestrofe{font-family:var(--ff-b);color:var(--text);line-height:1.95;margin:12px 0;font-size:var(--fs)}
+
+/* ALELUIA */
+.albox{background:var(--bg3);border:.5px solid var(--gold-dim);border-radius:10px;margin:14px 14px 0;padding:15px;text-align:center;transition:background .3s}
+.albox h2{font-family:var(--ff-t);color:var(--gold);font-size:18px;font-weight:700;letter-spacing:1px;margin-bottom:8px}
+.albox p{font-family:var(--ff-b);color:var(--text);font-size:calc(var(--fs) - 2px);font-style:italic;line-height:1.6}
+
+.salv{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:16px;padding-top:14px;border-top:.5px solid var(--border)}
+.salv span{font-family:var(--ff-t);color:var(--gold);font-size:13px;font-weight:700;letter-spacing:.5px}
+.cruz{color:var(--gold-dim);font-size:16px}
+
+.qm{font-family:var(--ff-b);color:var(--gold-dim);font-size:52px;line-height:.5;display:block;margin-bottom:10px}
+.sign{font-family:var(--ff-b);color:var(--gold);font-size:13px;font-style:italic;font-weight:600;text-align:right;margin-top:14px;padding-top:12px;border-top:.5px solid var(--border)}
+
+/* SANTO DO DIA */
+.santo-box{background:var(--bg3);border:.5px solid var(--gold-dim);border-radius:10px;margin:14px;padding:16px;transition:background .3s}
+.santo-emoji{font-size:40px;text-align:center;display:block;margin-bottom:10px}
+.santo-nome{font-family:var(--ff-t);color:var(--gold);font-size:15px;font-weight:700;text-align:center;margin-bottom:4px;letter-spacing:1px}
+.santo-data{font-family:var(--ff-b);color:var(--text3);font-size:10px;text-align:center;margin-bottom:12px;letter-spacing:1px}
+.santo-div{display:flex;align-items:center;gap:8px;margin:10px 0}
+.santo-div::before,.santo-div::after{content:'';flex:1;height:.5px;background:var(--gold-dim)}
+.santo-div span{color:var(--gold-dim);font-size:10px}
+.santo-vida{font-family:var(--ff-b);color:var(--text);font-size:calc(var(--fs) - 1px);line-height:1.85}
+.santo-vida p{margin-bottom:10px}.santo-vida p:last-child{margin-bottom:0}
+.santo-vida strong{color:var(--gold);font-weight:600}
+.santo-vida em{color:var(--text2);font-style:italic}
+.santo-oracao{background:var(--bg2);border-left:2px solid var(--gold);border-radius:0 7px 7px 0;padding:10px 13px;margin-top:12px;transition:background .3s}
+.santo-oracao p{font-family:var(--ff-b);color:var(--gold);font-style:italic;font-size:calc(var(--fs) - 2px);line-height:1.6}
+
+/* REFLEXÃO */
+.rbox{padding:15px;border-bottom:.5px solid var(--blk-border);background:var(--bg);transition:background .3s}
+.rhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.ebtn{background:var(--bg3);border:.5px solid var(--border2);border-radius:6px;padding:5px 14px;cursor:pointer;color:var(--gold);font-family:var(--ff-b);font-size:11px}
+.rtxt{font-family:var(--ff-b);color:var(--text2);font-size:13px;font-style:italic;line-height:1.7}
+.rarea{width:100%;background:var(--bg3);border:.5px solid var(--gold-dim);border-radius:8px;color:var(--text);font-family:var(--ff-b);font-size:13px;line-height:1.75;padding:12px;resize:none;display:none;margin-top:6px;outline:none;transition:background .3s}
+.rarea:focus{border-color:var(--gold)}
+
+/* BOTÕES */
+.wbtn{background:#1A3A1A;border:.5px solid #2A6A2A;border-radius:10px;margin:14px 14px 6px;padding:14px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer}
+.wbtn span{font-family:var(--ff-b);color:var(--wpp);font-size:14px;font-weight:600}
+.sbtn{background:var(--bg2);border:.5px solid var(--border2);border-radius:10px;margin:0 14px 10px;padding:11px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:background .3s}
+.sbtn span{font-family:var(--ff-b);color:var(--gold);font-size:13px}
+
+/* FOOTER */
+.ftr{text-align:center;padding:22px 16px 16px;background:var(--bg2);border-top:.5px solid var(--border);margin-top:8px;transition:background .3s}
+.ftr p{font-family:var(--ff-t);color:var(--gold);font-size:13px;letter-spacing:2px}
+.ftr small{font-family:var(--ff-b);color:var(--text2);font-size:14px;display:block;margin-top:6px;font-style:italic;font-weight:600}
+
+/* FONTBAR */
+.fontbar{background:var(--hdr);padding:7px 14px calc(7px + env(safe-area-inset-bottom,0px));display:flex;justify-content:space-between;align-items:center;border-top:.5px solid var(--border);flex-shrink:0;transition:background .3s}
+.flbl{color:var(--text3);font-size:10px}
+.fctrl{display:flex;align-items:center;gap:8px}
+.fbtn{background:var(--bg3);border:.5px solid var(--border);border-radius:5px;color:var(--gold);font-family:var(--ff-b);font-size:12px;padding:4px 12px;cursor:pointer;user-select:none}
+.fval{color:var(--text2);font-family:var(--ff-b);font-size:11px;min-width:22px;text-align:center}
+
+/* CALENDÁRIO */
+.calbox{padding:14px}
+.calhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.calhead h2{font-family:var(--ff-t);color:var(--gold);font-size:14px;font-weight:700;letter-spacing:1px}
+.calnav{background:var(--bg3);border:.5px solid var(--border);border-radius:7px;padding:6px 14px;cursor:pointer;color:var(--gold);font-size:18px;user-select:none}
+.caltempo{display:flex;align-items:center;gap:6px;margin:8px 0 10px}
+.calcor{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.caltxt{font-family:var(--ff-b);color:var(--text2);font-size:11px}
+.callbls{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:4px}
+.callbl{text-align:center;font-family:var(--ff-b);font-size:9px;color:var(--text3);padding:3px 0}
+.callbl:first-child{color:var(--cal-dom)}
+.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.calday{background:var(--bg2);border-radius:8px;padding:5px 2px;text-align:center;cursor:pointer;border:.5px solid var(--border2);transition:all .15s;min-height:42px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.calday:active{background:var(--bg3)}
+.calday.empty{background:transparent;border-color:transparent;cursor:default}
+.calday.hoje{background:var(--cal-hoje);border-color:var(--cal-hoje)}
+.calday.hoje .calnum{color:var(--cal-hoje-c);font-weight:700}
+.calday.sel{border-color:var(--gold);border-width:1.5px}
+.calday.dom .calnum{color:var(--cal-dom)}
+.calnum{font-family:var(--ff-b);font-size:13px;color:var(--text);font-weight:600;line-height:1}
+.caldot{width:5px;height:5px;border-radius:50%;opacity:0}
+.calday.tem .caldot{opacity:1}
+.calinfo{background:var(--bg2);border-radius:10px;padding:14px;margin-top:12px;border:.5px solid var(--border2);transition:background .3s}
+.calitit{font-family:var(--ff-t);color:var(--gold);font-size:12px;letter-spacing:1px;margin-bottom:4px}
+.calidat{font-family:var(--ff-b);color:var(--text2);font-size:11px;margin-bottom:8px}
+.calibtn{background:var(--gold);border:none;border-radius:8px;padding:11px;width:100%;font-family:var(--ff-b);font-size:13px;font-weight:600;color:var(--bg);cursor:pointer;margin-top:10px}
+.calleg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:14px}
+.callegit{background:var(--bg2);border-radius:7px;padding:8px 10px;display:flex;align-items:center;gap:8px;border:.5px solid var(--border2)}
+.callegtxt{font-family:var(--ff-b);color:var(--text2);font-size:10px;line-height:1.3}
+.cv{background:#4CAF50}.crx{background:#9C27B0}.cvm{background:#F44336}.cb{background:#F5F0E8;border:.5px solid #ccc}.cp{background:#E91E8C}
+
+/* PLACEHOLDER */
+.ph{padding:50px 24px;text-align:center}
+.ph .bigc{font-size:44px;display:block;margin-bottom:16px}
+.ph h2{font-family:var(--ff-t);color:var(--gold);font-size:14px;letter-spacing:1.5px;margin-bottom:10px}
+.ph p{font-family:var(--ff-b);color:var(--text3);font-size:13px;line-height:1.7}
+
+/* TOAST */
+.toast{position:fixed;bottom:75px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg3);border:.5px solid var(--gold);border-radius:8px;padding:10px 20px;font-family:var(--ff-b);color:var(--gold);font-size:12px;opacity:0;transition:all .3s;pointer-events:none;z-index:999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="logo-box"><span>F</span></div>
+    <div class="logo-text"><h1>FIDES MISSA</h1><p>LITURGIA DIÁRIA DA MISSA</p></div>
+    <div class="hbtn" onclick="mudarFonte(-1)">A<span style="font-size:9px">−</span></div>
+    <div class="hbtn" onclick="mudarFonte(1)">A<span style="font-size:15px">+</span></div>
+    <div class="hbtn" onclick="alternarTema()" id="themeBtn" style="font-size:16px">🌙</div>
+  </div>
+
+  <!-- DATEBAR -->
+  <div class="datebar">
+    <span class="datebar-d">📅 <span id="dataHoje"></span></span>
+    <div class="badge"><span id="tempoLit">Tempo Comum • V Semana</span></div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab active" onclick="aba(0,this)">✝️ Santa Missa</div>
+    <div class="tab" onclick="aba(1,this)">😇 Santo do Dia</div>
+    <div class="tab" onclick="aba(2,this)">📅 Calendário</div>
+    <div class="tab" onclick="aba(3,this)">🔔 Alertas</div>
+  </div>
+
+  <div class="content">
+
+    <!-- ══════════════ SANTA MISSA ══════════════ -->
+    <div class="screen active" id="s0">
+
+      <div class="sh"><div class="si" style="color:var(--teal)">🙏</div><div><div class="st" style="color:var(--teal)">ORAÇÃO COLETA</div><div class="ss">Abertura da Santa Missa</div></div></div>
+      <div class="blk"><div class="txt"><p>Ó Deus, de quem procedem todos os bens, concedei aos que vos suplicam com fé que tudo o que é reto tenha sua origem em vós. Por Nosso Senhor Jesus Cristo, vosso Filho, que é Deus convosco na unidade do Espírito Santo e reina pelos séculos dos séculos.</p></div><div class="amen">Amém.</div></div>
+
+      <div class="sh"><div class="si" style="color:var(--gold)">📕</div><div><div class="st">PRIMEIRA LEITURA</div><div class="ss">Atos dos Apóstolos · At 15, 7-21</div></div></div>
+      <div class="blk">
+        <div class="div"><span>✦</span></div>
+        <div class="txt">
+          <span class="ref">AT 15, 7-21</span>
+          <p><span class="intro">Depois de longa discussão,</span> Pedro levantou-se e disse: <strong>"Irmãos, sabeis que, desde os primeiros dias, Deus escolheu dentre vós que eu fosse o portador da Palavra do Evangelho aos gentios,</strong> para que eles ouvissem e cressem. Deus, que conhece os corações, deu-lhes testemunho, concedendo-lhes o Espírito Santo, como a nós; não fez nenhuma distinção entre eles e nós, pois purificou os seus corações pela fé.</p>
+          <p>Por que, então, tentais a Deus, pondo sobre os ombros dos discípulos um jugo que nem nossos pais nem nós pudemos carregar? <strong>Pelo contrário, acreditamos que somos salvos pela graça do Senhor Jesus,</strong> assim como eles."</p>
+          <p>Então Tiago tomou a palavra: <strong>"Irmãos, ouvi-me!</strong> Por isso, eu julgo que não devemos criar dificuldades aos que, vindos dos gentios, se convertem a Deus."</p>
+        </div>
+        <div class="psenhor">— Palavra do Senhor.</div>
+      </div>
+
+      <div class="sh"><div class="si" style="color:var(--teal)">🎵</div><div><div class="st" style="color:var(--teal)">SALMO RESPONSORIAL</div><div class="ss">Salmo 95 (96)</div></div></div>
+      <div class="blk">
+        <div class="srbox"><div class="slbl">ANTÍFONA</div><div class="sr">R/ Anunciai a glória do Senhor a todos os povos.</div></div>
+        <div class="sestrofe">Cantai ao Senhor um cântico novo,<br>cantai ao Senhor, ó terra inteira!<br><em>Cantai ao Senhor, bendizei seu nome,</em><br>anunciai dia a dia a sua salvação!</div>
+        <div class="antif"><p>R/ Anunciai a glória do Senhor a todos os povos.</p></div>
+        <div class="sestrofe">Anunciai entre as nações a sua glória,<br>entre todos os povos as suas maravilhas.<br><em>Pois o Senhor é grande e muito digno de louvor,</em><br>mais temível que todos os deuses.</div>
+        <div class="antif"><p>R/ Anunciai a glória do Senhor a todos os povos.</p></div>
+        <div class="sestrofe"><strong>Glória e majestade estão diante d'Ele,</strong><br>força e beleza no seu santuário.<br>Rendei ao Senhor, famílias dos povos,<br>rendei ao Senhor glória e poder.</div>
+        <div class="antif"><p>R/ Anunciai a glória do Senhor a todos os povos.</p></div>
+        <div class="sestrofe"><strong>Dizei entre as nações: "O Senhor reina!"</strong><br>Ele governa os povos com justiça.<br>Regozijai-vos, céus, e exulte a terra!</div>
+        <div class="antif"><p>R/ Anunciai a glória do Senhor a todos os povos.</p></div>
+      </div>
+
+      <div class="albox"><h2>✦ Aleluia, Aleluia! ✦</h2><p><em>Eu sou a videira verdadeira e meu Pai é o agricultor,<br>diz o Senhor; permanecei em mim e eu em vós.</em></p></div>
+      <div class="sh"><div class="si" style="color:#EAC84A">⭐</div><div><div class="st" style="color:#EAC84A">SANTO EVANGELHO</div><div class="ss">Evangelho de São João · Jo 15, 9-17</div></div></div>
+      <div class="blk">
+        <div class="div"><span>✦</span></div>
+        <div class="txt">
+          <span class="ref">JO 15, 9-17</span>
+          <p><span class="intro">Naquele tempo, disse Jesus:</span> <strong>"Como o Pai me amou, eu também vos amei; permanecei no meu amor.</strong> Se guardardes os meus mandamentos, permanecereis no meu amor.</p>
+          <p><strong>Disse-vos estas coisas para que a minha alegria esteja em vós e a vossa alegria seja completa.</strong></p>
+          <p>Este é o meu mandamento: <strong>amai-vos uns aos outros como eu vos amei.</strong> Ninguém tem maior amor do que aquele que dá a vida pelos seus amigos.</p>
+          <p><strong>Já não vos chamo servos... mas chamo-vos amigos,</strong> porque tudo o que ouvi de meu Pai vos dei a conhecer.</p>
+          <p>Não fostes vós que me escolhestes; <strong>fui eu que vos escolhi.</strong> Isso é o que vos ordeno: <strong>amai-vos uns aos outros."</strong></p>
+        </div>
+        <div class="salv"><span class="cruz">✝</span><span>Palavra da Salvação.</span><span class="cruz">✝</span></div>
+      </div>
+
+      <div class="sh"><div class="si" style="color:var(--gold)">🎙️</div><div><div class="st">HOMILIA</div><div class="ss">Reflexão pastoral · Diác. Rômulo Guerra</div></div></div>
+      <div class="blk">
+        <span class="qm">"</span>
+        <div class="txt">
+          <p>O amor de Cristo não é um sentimento passageiro, mas uma <strong>escolha permanente e fiel.</strong> Quando Jesus diz <em>"permanecei no meu amor"</em>, convida-nos a fazer do amor o centro de toda a nossa existência.</p>
+          <p>Os mandamentos não são prisões, mas <strong>caminhos de liberdade.</strong> Como São Agostinho nos ensina: <em>"Ama e faze o que quiseres"</em> — porque quem ama de verdade só quer o bem do outro.</p>
+          <p>Ele nos chama <strong>amigos — não servos.</strong> Que esta Eucaristia nos encha de coragem para amar assim.</p>
+        </div>
+        <div class="sign">— Diác. Rômulo Guerra</div>
+      </div>
+
+      <div class="sh"><div class="si" style="color:var(--teal)">🕊️</div><div><div class="st" style="color:var(--teal)">ORAÇÃO SOBRE AS OFERENDAS</div><div class="ss">Antes do Prefácio Eucarístico</div></div></div>
+      <div class="blk"><div class="txt"><p>Aceitai, Senhor, as preces do vosso povo juntamente com as oferendas dos sacrifícios, para que, iniciados nos mistérios pascais, alcancemos a pátria celeste. Por Cristo, Nosso Senhor.</p></div><div class="amen">Amém.</div></div>
+
+      <div class="sh"><div class="si" style="color:var(--teal)">🍞</div><div><div class="st" style="color:var(--teal)">APÓS A COMUNHÃO</div><div class="ss">Oração de ação de graças</div></div></div>
+      <div class="blk"><div class="txt"><p>Senhor, que nos alimentastes nesta mesa sagrada, concedei-nos os dons do vosso Espírito e fazei-nos anunciar as maravilhas que realizastes no meio do vosso povo. Por Cristo, Nosso Senhor.</p></div><div class="amen">Amém.</div></div>
+
+      <div class="sh"><div class="si" style="color:var(--gold)">✏️</div><div><div class="st">REFLEXÃO PESSOAL</div><div class="ss">Seu comentário sobre as leituras</div></div></div>
+      <div class="rbox">
+        <div class="rhead"><span style="font-size:9px;color:var(--gold-dim);letter-spacing:2px">ADICIONE SEU COMENTÁRIO</span><div class="ebtn" id="editBtn" onclick="toggleRef()">Editar</div></div>
+        <div class="div"><span>✦</span></div>
+        <div id="rTxt" class="rtxt">Toque em "Editar" para escrever sua reflexão pessoal.</div>
+        <textarea id="rArea" class="rarea" rows="5" placeholder="Escreva aqui sua reflexão..."></textarea>
+      </div>
+
+      <div class="wbtn" onclick="compartilharWpp()"><span style="font-size:22px">💬</span><span>Compartilhar via WhatsApp</span></div>
+      <div class="sbtn" onclick="compartilharGeral()"><span style="font-size:16px">🔗</span><span>Compartilhar em outro app</span></div>
+      <div class="ftr"><p>✦  ✝  FIDES MISSA  ✝  ✦</p><small>Diác. Rômulo Guerra</small></div>
+    </div>
+
+    <!-- ══════════════ SANTO DO DIA ══════════════ -->
+    <div class="screen" id="s1"><div class="sh" style="margin-bottom:0"><div class="si" style="color:var(--gold)">😇</div><div><div class="st">SANTO DO DIA</div><div class="ss" id="santoNomeHeader">Carregando...</div></div></div>
+      <div id="santoContainer"></div>
+    </div>
+
+    <!-- ══════════════ CALENDÁRIO ══════════════ -->
+    <div class="screen" id="s2">
+      <div class="calbox">
+        <div class="calhead">
+          <div class="calnav" onclick="calNav(-1)">‹</div>
+          <h2 id="calTit"></h2>
+          <div class="calnav" onclick="calNav(1)">›</div>
+        </div>
+        <div class="caltempo"><div class="calcor" id="calCor"></div><span class="caltxt" id="calTempo"></span></div>
+        <div class="callbls"><div class="callbl">Dom</div><div class="callbl">Seg</div><div class="callbl">Ter</div><div class="callbl">Qua</div><div class="callbl">Qui</div><div class="callbl">Sex</div><div class="callbl">Sáb</div></div>
+        <div class="calgrid" id="calGrid"></div>
+        <div class="calinfo">
+          <div class="calitit" id="calDiaTit"></div>
+          <div class="calidat" id="calDiaDat"></div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:6px"><div class="calcor" id="calDiaCor"></div><span class="caltxt" id="calDiaTempo"></span></div>
+          <div style="margin-top:6px;font-family:var(--ff-b);color:var(--text3);font-size:11px" id="calDiaSanto"></div>
+          <button class="calibtn" onclick="irMissa()">✝ Ver Liturgia do Dia</button>
+        </div>
+        <div class="calleg">
+          <div class="callegit"><div class="calcor cv"></div><div class="callegtxt">Tempo Comum</div></div>
+          <div class="callegit"><div class="calcor crx"></div><div class="callegtxt">Advento / Quaresma</div></div>
+          <div class="callegit"><div class="calcor cb"></div><div class="callegtxt">Natal / Páscoa / Festas</div></div>
+          <div class="callegit"><div class="calcor cvm"></div><div class="callegtxt">Mártires / Pentecostes</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════ ALERTAS ══════════════ -->
+    <div class="screen" id="s3">
+      <div class="ph">
+        <span class="bigc">🔔</span><h2>ALERTAS DIÁRIOS</h2><p>Receba a liturgia do dia no horário que preferir!</p>
+        <div style="margin-top:20px"><button onclick="pedirNotif()" style="background:var(--gold);border:none;border-radius:8px;padding:13px;font-family:var(--ff-b);font-size:13px;color:var(--bg);cursor:pointer;width:100%;font-weight:600">🔔 Ativar Notificações Diárias</button></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="fontbar">
+    <span class="flbl">Tamanho do texto</span>
+    <div class="fctrl"><div class="fbtn" onclick="mudarFonte(-1)">A−</div><div class="fval" id="fval">15</div><div class="fbtn" onclick="mudarFonte(1)">A+</div></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
+
+// ── SANTOS DO ANO ─────────────────────────────────────────────────────────────
+var SANTOS = {
+  "01-01":{emoji:"👑",nome:"Maria, Mãe de Deus",data:"1º de Janeiro",vida:"<p><strong>Maria Santíssima</strong>, a Mãe de Deus, é celebrada no primeiro dia do ano como um presente de Deus à humanidade. Nascida em Nazaré, foi escolhida desde a eternidade para ser a <em>Mãe do Verbo Encarnado.</em></p><p>Sua vida foi marcada pelo <strong>sim incondicional a Deus</strong>: na Anunciação, aceitou ser a Mãe do Salvador; na Visitação, levou Cristo a Isabel; em Belém, deu à luz o Filho de Deus; no Calvário, permaneceu fiel ao pé da Cruz.</p><p>A Igreja a venera como <strong>Theotókos</strong> (Mãe de Deus), título proclamado pelo Concílio de Éfeso em 431. Ela é nossa mãe, intercessora e modelo de fé.",oracao:"Santa Maria, Mãe de Deus, rogai por nós pecadores, agora e na hora da nossa morte. Amém."},
+  "01-06":{emoji:"⭐",nome:"Epifania do Senhor",data:"6 de Janeiro",vida:"<p>A <strong>Epifania</strong> celebra a manifestação de Jesus Cristo ao mundo, representada pela visita dos <em>Reis Magos do Oriente</em> — símbolo de todas as nações que buscam o Salvador.</p><p>Guiados por uma <strong>estrela misteriosa</strong>, Melquior, Gaspar e Baltazar percorreram longas jornadas levando ouro (realeza), incenso (divindade) e mirra (humanidade mortal).</p><p>Esta festa nos lembra que <strong>Cristo veio para todos os povos</strong>, sem distinção de raça ou nação.",oracao:"Jesus, luz das nações, iluminai nossos caminhos e guiai-nos até Vós, como guiastes os Magos pela estrela. Amém."},
+  "01-17":{emoji:"🦁",nome:"Santo Antão, Abade",data:"17 de Janeiro",vida:"<p><strong>Santo Antão</strong> (251-356) nasceu no Egito e é considerado o <em>pai do monaquismo cristão.</em> Aos 20 anos, vendeu tudo que tinha e foi viver no deserto, após ouvir o Evangelho: <strong>'Se queres ser perfeito, vai, vende tudo e segue-me.'</strong></p><p>Viveu décadas em solidão, combatendo as tentações do demônio com oração, jejum e trabalho manual. Sua fama de santidade atraiu tantos discípulos que acabou fundando as primeiras comunidades monásticas.</p><p>Morreu aos <strong>105 anos</strong>, com a mente lúcida e o coração em Deus.",oracao:"Santo Antão, mestre do deserto e da oração, ensinai-nos a buscar a Deus em silêncio e a vencer as tentações pela graça divina. Amém."},
+  "01-24":{emoji:"✍️",nome:"São Francisco de Sales",data:"24 de Janeiro",vida:"<p><strong>São Francisco de Sales</strong> (1567-1622) nasceu na Savóia (França) e é Doutor da Igreja e padroeiro dos escritores e jornalistas. <em>Converteu 72.000 calvinistas</em> ao catolicismo pela gentileza e pelo diálogo.</p><p>Seu lema era: <strong>'Apanhar mais moscas com uma colher de mel do que com um barril de vinagre.'</strong> Escreveu a célebre <em>Introdução à Vida Devota</em>, mostrando que a santidade é possível para todos, não só para religiosos.</p><p>Foi canonizado em 1665 e proclamado Doutor da Igreja em 1877.",oracao:"São Francisco de Sales, ensinai-nos a mansuetude e a doçura no trato com todos, para que possamos atrair as almas a Deus pela bondade. Amém."},
+  "01-28":{emoji:"📚",nome:"São Tomás de Aquino",data:"28 de Janeiro",vida:"<p><strong>São Tomás de Aquino</strong> (1225-1274) é o maior filósofo e teólogo da história da Igreja, Doutor Angélico e padroeiro das universidades. Nasceu na Itália, numa família nobre, e ingressou nos Dominicanos contra a vontade da família.</p><p>Sua obra-prima, a <em>Suma Teológica</em>, é uma das mais extraordinárias sínteses do pensamento humano. Conciliou a fé cristã com a filosofia de Aristóteles, mostrando que <strong>fé e razão não se contradizem.</strong></p><p>Em visão mística, Jesus lhe disse: <em>'Tomás, escreveste bem sobre mim. Que recompensa queres?'</em> E ele respondeu: <strong>'Somente a Ti, Senhor.'</strong>",oracao:"São Tomás, iluminai nossas mentes com a luz da sabedoria e ensinai-nos que a fé e a razão caminham juntas em direção à verdade. Amém."},
+  "02-02":{emoji:"🕯️",nome:"Apresentação do Senhor",data:"2 de Fevereiro",vida:"<p>A <strong>Apresentação do Senhor</strong>, também chamada de <em>Candelária</em>, celebra o dia em que Maria e José levaram o menino Jesus ao Templo de Jerusalém, 40 dias após o seu nascimento, conforme a Lei de Moisés.</p><p>No Templo, o ancião <strong>Simeão</strong>, movido pelo Espírito Santo, tomou o menino nos braços e proclamou o célebre cântico: <em>'Luz para iluminar as nações e glória do teu povo Israel.'</em></p><p>As velas bêntas neste dia simbolizam <strong>Cristo, Luz do Mundo</strong>, que vence as trevas do pecado.",oracao:"Jesus, Luz das nações, como Simeão te recebeu nos braços com alegria, que nós te recebamos sempre com fé viva em nossos corações. Amém."},
+  "02-14":{emoji:"❤️",nome:"São Valentim, Mártir",data:"14 de Fevereiro",vida:"<p><strong>São Valentim</strong> foi um sacerdote romano do século III que, segundo a tradição, celebrava casamentos para casais cristãos mesmo quando o imperador Cláudio II havia proibido o matrimônio para os soldados.</p><p>Preso e martirizado por volta de <strong>269 d.C.</strong>, tornou-se símbolo do amor verdadeiro, aquele que dá a vida pelo outro. A associação com o amor romântico surgiu na Idade Média.</p><p>Seu martírio nos recorda que <strong>o verdadeiro amor é dom de Deus</strong> e exige coragem, sacrifício e fidelidade.",oracao:"São Valentim, intercessor dos que amam, ajudai-nos a amar com pureza e fidelidade, à imagem do amor de Cristo pela sua Igreja. Amém."},
+  "02-22":{emoji:"🪑",nome:"Cátedra de São Pedro",data:"22 de Fevereiro",vida:"<p>A festa da <strong>Cátedra de São Pedro</strong> celebra a missão de liderança que Cristo confiou ao Apóstolo Pedro: <em>'Tu és Pedro, e sobre esta pedra edificarei a minha Igreja.'</em></p><p><strong>São Pedro</strong>, pescador da Galileia, foi escolhido por Jesus para ser o primeiro papa. Apesar de ter negado Cristo três vezes, foi restaurado pelo amor misericordioso do Ressuscitado, que lhe perguntou três vezes: <em>'Pedro, tu me amas?'</em></p><p>Morreu mártir em Roma, <strong>crucificado de cabeça para baixo</strong> por humildade, pois julgava não merecer morrer como seu Senhor.",oracao:"São Pedro, fundamento da Igreja, rogai para que nos mantenhamos firmes na fé, unidos ao sucessor de Pedro, o Papa. Amém."},
+  "03-17":{emoji:"☘️",nome:"São Patrício, Bispo",data:"17 de Março",vida:"<p><strong>São Patrício</strong> (389-461) nasceu na Bretanha romana e foi raptado por piratas irlandeses aos 16 anos. Durante 6 anos de escravidão na Irlanda, <em>converteu-se profundamente a Deus</em>, orando centenas de vezes ao dia nos campos onde guardava ovelhas.</p><p>Fugindo para casa, sentiu o chamado divino para <strong>voltar à Irlanda como missionário.</strong> Com paciência e amor, converteu o povo irlandês ao Cristianismo, usando o trevo de três folhas para explicar a <em>Santíssima Trindade.</em></p><p>É considerado o maior santo da Irlanda e um dos mais importantes evangelizadores da Europa.",oracao:"São Patrício, que não temestes voltar àqueles que vos escravizaram para anunciar o Evangelho, dai-nos coragem missionária e amor aos nossos inimigos. Amém."},
+  "03-19":{emoji:"⚒️",nome:"São José, Esposo de Maria",data:"19 de Março",vida:"<p><strong>São José</strong> é o pai adotivo de Jesus Cristo, esposo de Maria Santíssima e patrono da Igreja Universal. Carpinteiro de Nazaré, foi <em>escolhido por Deus</em> para ser o guardião do maior tesouro da humanidade.</p><p>Homem justo e silencioso — o Evangelho nunca registra uma única palavra sua — José agiu sempre com obediência total: levou a família para o Egito para salvar o Menino Jesus, e trabalhou com suas mãos para sustentar a Sagrada Família.</p><p>O Papa Francisco proclamou <strong>2021 como o Ano de São José</strong>, destacando sua figura como modelo de pai, trabalhador e homem de fé.",oracao:"São José, pai solícito e esposo fiel, protegei nossas famílias, nosso trabalho e nossa fé. Sede nosso intercessor na hora da morte. Amém."},
+  "03-25":{emoji:"🌹",nome:"Anunciação do Senhor",data:"25 de Março",vida:"<p>A <strong>Anunciação do Senhor</strong> celebra o momento em que o Anjo Gabriel anunciou a Maria que ela seria a Mãe do Filho de Deus. Com seu <em>'Eis aqui a serva do Senhor'</em>, Maria deu o seu livre e total consentimento ao plano divino.</p><p>Neste instante sublime, <strong>o Verbo se fez carne</strong> no seio de Maria — o maior milagre da história da humanidade. Deus assumiu a natureza humana para nos salvar.</p><p>Esta data, exatamente 9 meses antes do Natal, nos convida a contemplar o <em>mistério da Encarnação</em>: Deus que se torna homem por amor.",oracao:"Senhor Jesus, que vos encarnastes no seio de Maria, dai-nos a mesma disponibilidade de Maria para dizer 'sim' à vossa vontade em nossas vidas. Amém."},
+  "04-23":{emoji:"⚔️",nome:"São Jorge, Mártir",data:"23 de Abril",vida:"<p><strong>São Jorge</strong> foi um soldado romano de origem grega, martirizado por volta de 303 d.C. pelo imperador Diocleciano, por se recusar a apostatar da fé cristã. Seu nome significa <em>'aquele que trabalha a terra'</em>.</p><p>A lendária batalha com o dragão é uma alegoria da <strong>luta do bem contra o mal</strong>, da fé contra o paganismo, da graça contra o pecado. São Jorge representa o cristão que, com a força de Deus, vence todos os seus 'dragões' interiores.</p><p>É padroeiro da Inglaterra, Portugal, do Brasil (como padroeiro secundário) e de dezenas de nações e cidades.",oracao:"São Jorge, cavaleiro corajoso da fé, intercedei por nós para que enfrentemos com bravura os combates espirituais da vida cristã. Amém."},
+  "04-29":{emoji:"📖",nome:"Santa Catarina de Siena",data:"29 de Abril",vida:"<p><strong>Santa Catarina de Siena</strong> (1347-1380) foi uma mística italiana, Doutora da Igreja e padroeira da Itália e da Europa. A 25ª filha de um tintureiro, nunca aprendeu a ler, mas ditou milhares de cartas e obras teológicas por inspiração divina.</p><p>Recebeu os <em>estigmas de Cristo</em> e teve visões místicas extraordinárias. Com coragem profética, escreveu ao Papa Gregório XI — então em Avignon — exigindo seu retorno a Roma: <strong>'Sede homem, não covarde!'</strong></p><p>Morreu aos 33 anos, a mesma idade de Cristo, exausta pelo amor a Deus e às almas.",oracao:"Santa Catarina, doutora da Igreja e mística do amor divino, ensinai-nos a mergulhar no oceano do amor de Deus e a servi-Lo em nossos irmãos. Amém."},
+  "05-01":{emoji:"⚒️",nome:"São José Operário",data:"1º de Maio",vida:"<p>Em 1º de Maio, a Igreja celebra <strong>São José Operário</strong>, uma festa instituída pelo Papa Pio XII em 1955, em resposta ao Dia Internacional do Trabalho, para santificar o trabalho humano à luz do Evangelho.</p><p>São José, o carpinteiro de Nazaré, é o modelo do trabalhador cristão: trabalhava com suas mãos, em silêncio e dedicação, para <strong>sustentar Jesus e Maria.</strong> Com seu trabalho humilde, colaborou com o plano de salvação de Deus.</p><p>O trabalho, ensinado por José, é participação na obra criadora de Deus e meio de santificação pessoal.",oracao:"São José Operário, santificai nosso trabalho diário, protegei os trabalhadores do mundo e ensinai-nos a oferecer a Deus cada tarefa realizada com amor e competência. Amém."},
+  "05-03":{emoji:"✝️",nome:"Santos Filipe e Tiago, Apóstolos",data:"3 de Maio",vida:"<p><strong>São Filipe</strong> foi um dos primeiros discípulos de Jesus, natural de Betsaida. Foi ele quem levou Natanael (Bartolomeu) a Cristo, dizendo: <em>'Vem e vê!'</em> Morreu mártir na Frígia.</p><p><strong>São Tiago</strong> (o Menor), filho de Alfeu, foi o primeiro bispo de Jerusalém e autor da Epístola de São Tiago. Morreu mártir atirado do alto do Templo e apedrejado por volta do ano 62.</p><p>Ambos testemunharam a Ressurreição de Cristo e deram a vida pela fé que anunciavam.",oracao:"Santos Filipe e Tiago, apóstolos corajosos, ensinai-nos a dizer a todos: 'Vinde e vede' — e a testemunhar Cristo com nossas vidas. Amém."},
+  "05-08":{emoji:"✝️",nome:"Aparição de São Miguel Arcanjo",data:"8 de Maio",vida:"<p>Em <strong>8 de maio</strong>, a Igreja celebra a memória da <strong>Aparição de São Miguel Arcanjo</strong> no Monte Gargano, Itália, por volta do ano 490. São Miguel apareceu ao bispo de Siponto indicando uma gruta como lugar sagrado de sua proteção.</p><p>O Monte Gargano tornou-se um dos mais antigos santuários da cristandade, visitado por São Bernardo, São Tomás de Aquino e Padre Pio, devoto fervoroso de São Miguel.</p><p><strong>São Miguel é o príncipe da milícia celeste</strong>, protetor da Igreja e defensor dos fiéis contra o demônio. Seu nome significa: <em>Quem como Deus?</em> — o grito de batalha contra Lúcifer.</p>",oracao:"São Miguel Arcanjo, defendei-nos no combate, sede nosso auxílio contra a maldade e as ciladas do demônio. Que Deus o repreenda, humildemente o pedimos. Vós, príncipe da milícia celeste, precipitai no inferno Satanás e os outros espíritos malignos. Amém."},
+  "05-13":{emoji:"🌹",nome:"Nossa Senhora de Fátima",data:"13 de Maio",vida:"<p>Em <strong>13 de maio de 1917</strong>, a Virgem Maria apareceu pela primeira vez a três pastorzinhos em Fátima, Portugal: Lúcia (10 anos), Francisco (9) e Jacinta (7). Até outubro do mesmo ano, as aparições se repetiram 6 vezes.</p><p>Nossa Senhora pediu <strong>oração, penitência e a consagração da Rússia ao seu Imaculado Coração.</strong> Revelou três segredos proféticos e prometeu: <em>'No fim, o meu Imaculado Coração triunfará.'</em></p><p>Em 13 de outubro, 70.000 pessoas viram o <strong>Milagre do Sol</strong>, confirmando a autenticidade das aparições. Francisco e Jacinta foram canonizados pelo Papa Francisco em 2017.",oracao:"Nossa Senhora de Fátima, rogai por nós e pelo mundo. Que possamos rezar o Rosário todos os dias e converter nossos corações a Deus. Amém."},
+  "05-31":{emoji:"🌸",nome:"Visitação de Maria a Isabel",data:"31 de Maio",vida:"<p>Após a Anunciação, Maria foi visitar sua prima Isabel 'às pressas', percorrendo cerca de 150 km. Ao chegar, Isabel, movida pelo Espírito Santo, exclamou: <strong>'Bendita és tu entre as mulheres e bendito é o fruto do teu ventre!'</strong></p><p>João Batista, ainda no útero de Isabel, <em>saltou de alegria</em> ao sentir a presença do Messias que Maria carregava. Foi o primeiro a adorar a Jesus Cristo.</p><p>Maria respondeu com o sublime cântico do <strong>Magnificat</strong>: 'A minha alma engrandece o Senhor...' — um hino de louvor, gratidão e profecia.",oracao:"Maria, que levaste Jesus a Isabel, ajudai-nos a levar Cristo a todos que encontramos, servindo com amor e alegria. Amém."},
+  "06-13":{emoji:"🐟",nome:"Santo Antônio de Pádua",data:"13 de Junho",vida:"<p><strong>Santo Antônio de Pádua</strong> (1195-1231) nasceu em Lisboa, Portugal, e é um dos santos mais amados do mundo, patrono dos pobres e dos objetos perdidos. Ingressou nos Franciscanos e tornou-se o pregador mais famoso de sua época.</p><p>São Francisco de Assis o chamou de <em>'meu bispo'</em>. Pregava com tal sabedoria que os próprios peixes saíam da água para ouvi-lo, segundo a lenda. Realizou <strong>milagres extraordinários</strong> em vida e após a morte.</p><p>Morreu aos 36 anos, exausto pelas missões. Foi canonizado apenas <strong>352 dias</strong> após sua morte — um dos mais rápidos da história.",oracao:"Santo Antônio, advogado dos pobres e dos que perderam algo precioso, ajudai-nos a encontrar o que perdemos, especialmente a Deus e a nós mesmos. Amém."},
+  "06-24":{emoji:"🌊",nome:"Nascimento de São João Batista",data:"24 de Junho",vida:"<p><strong>São João Batista</strong> é o único santo, além de Maria, cujo nascimento a Igreja celebra (além da morte). Nasceu 6 meses antes de Jesus, filho de Zacarias e Isabel, familiares de Maria Santíssima.</p><p>Santificado no útero materno quando Maria visitou Isabel, João viveu no deserto, alimentando-se de <em>gafanhotos e mel silvestre</em>, vestindo pelo de camelo — imagem de radical entrega a Deus.</p><p>Foi o <strong>precursor de Cristo</strong>, preparando os corações pela pregação da conversão e pelo Batismo no Jordão. Morreu decapitado por Herodes por defender a moral e a verdade.",oracao:"São João Batista, precursor de Cristo, ensinai-nos a preparar nossos corações para receber Jesus, pregando a verdade com coragem. Amém."},
+  "06-29":{emoji:"⚓",nome:"Santos Pedro e Paulo, Apóstolos",data:"29 de Junho",vida:"<p><strong>São Pedro</strong>, o pescador escolhido como pedra da Igreja, e <strong>São Paulo</strong>, o perseguidor convertido em maior missionário da história, são os dois pilares do Cristianismo e morreram mártires em Roma.</p><p>Pedro foi <em>crucificado de cabeça para baixo</em> no Vaticano (por volta de 64 d.C.), por humildade. Paulo foi <em>decapitado</em> fora dos muros de Roma, pois como cidadão romano, tinha direito a morte mais digna.</p><p>Juntos, representam a unidade da Igreja: Pedro, o pastor; Paulo, o missionário. <strong>Dois caracteres opostos, um só Espírito.</strong>",oracao:"Santos Pedro e Paulo, fundamentos da Igreja, fortalecei nossa fé, protegei o Papa e ajudai-nos a anunciar o Evangelho com coragem. Amém."},
+  "07-03":{emoji:"🤚",nome:"São Tomé, Apóstolo",data:"3 de Julho",vida:"<p><strong>São Tomé</strong>, chamado Dídimo (que significa 'gêmeo'), é o apóstolo que duvidou da Ressurreição e pediu provas. Jesus apareceu especialmente para ele e disse: <em>'Põe aqui o teu dedo e vê as minhas mãos...'</em></p><p>Ao ver e tocar as chagas de Cristo, Tomé exclamou a maior profissão de fé dos Evangelhos: <strong>'Meu Senhor e meu Deus!'</strong> Jesus respondeu: 'Porque me viste, creste. Felizes os que não viram e creram.'</p><p>Segundo a tradição, São Tomé evangelizou a <em>Índia</em>, onde morreu mártir por volta de 72 d.C. Os cristãos de Querela, na Índia, afirmam descender de seus convertidos.",oracao:"São Tomé, que passastes da dúvida à fé plena, fortalecei nossa fé nos momentos de escuridão e dúvida, para que proclamemos: Meu Senhor e meu Deus! Amém."},
+  "07-22":{emoji:"💜",nome:"Santa Maria Madalena",data:"22 de Julho",vida:"<p><strong>Santa Maria Madalena</strong> é chamada de <em>'Apóstola dos Apóstolos'</em> pelo Papa Francisco, pois foi a primeira a ver o Cristo Ressuscitado e a anunciar a Ressurreição aos demais discípulos. Jesus lhe disse: <em>'Vai e diz aos meus irmãos...'</em></p><p>Libertada de sete demônios por Jesus, tornou-se uma das suas seguidoras mais dedicadas, esteve ao pé da Cruz e foi ao Sepulcro antes do amanhecer. Seu amor por Cristo venceu o medo.</p><p>A tradição francesa diz que viveu seus últimos anos em Provença, na contemplação e penitência.",oracao:"Santa Maria Madalena, que buscastes a Cristo com lágrimas e amor, ensinai-nos a nunca desistir de encontrá-Lo, mesmo nas horas de trevas. Amém."},
+  "07-25":{emoji:"⚡",nome:"São Tiago, Apóstolo",data:"25 de Julho",vida:"<p><strong>São Tiago</strong> (o Maior), filho de Zebedeu e irmão de João, foi um dos três apóstolos mais próximos de Jesus — junto com Pedro e João. Testemunhou a Transfiguração e a agonia do Getsêmani.</p><p>Jesus o chamou, com seu irmão, de <em>'Boanerges' (Filhos do Trovão)</em>, pela sua personalidade ardente. Foi o <strong>primeiro apóstolo a ser martirizado</strong>, decapitado pelo rei Herodes Agripa por volta de 44 d.C.</p><p>Seu túmulo em <strong>Santiago de Compostela</strong>, na Espanha, é um dos maiores centros de peregrinação do mundo há mais de mil anos.",oracao:"São Tiago, filho do trovão e peregrino de Deus, acompanhai-nos em nossa peregrinação pela vida e fortalecei nossa vocação cristã. Amém."},
+  "08-04":{emoji:"🏡",nome:"São João Maria Vianney",data:"4 de Agosto",vida:"<p><strong>São João Maria Vianney</strong> (1786-1859), o Cura d'Ars, é padroeiro dos sacerdotes. Reprovado nos seminários por dificuldades intelectuais, foi ordenado padre graças à persistência de seu pároco, que disse: <em>'A Igreja não precisa apenas de sábios, mas de santos.'</em></p><p>Como pároco do pequeno vilarejo de Ars, na França, transformou completamente a vida do povo pela <strong>confissão, pregação e penitência.</strong> Chegou a passar até 16 horas por dia no confessionário, recebendo mais de 20.000 pessoas por ano de toda a Europa.</p><p>Combatia o demônio fisicamente — relatos afirmam que o diabo o atormentava à noite com ruídos e ataques físicos, mas ele respondia com humor: <em>'É o grappin de novo!'</em>",oracao:"São João Vianney, pastor fiel e confessor incansável, rezai pelos sacerdotes e ensinai-nos a amar o sacramento da confissão como encontro com a misericórdia de Deus. Amém."},
+  "08-10":{emoji:"🔥",nome:"São Lourenço, Diácono e Mártir",data:"10 de Agosto",vida:"<p><strong>São Lourenço</strong> foi diácono em Roma no século III, responsável pelos bens da Igreja e pelo cuidado aos pobres. Quando o imperador Valeriano mandou prendê-lo e exigiu que entregasse os tesouros da Igreja, Lourenço apresentou os pobres dizendo: <strong>'Estes são os tesouros da Igreja!'</strong></p><p>Foi condenado a morrer assado vivo em uma grelha de ferro. No meio do suplício, com extraordinária coragem, disse ao prefeito romano: <em>'Pode me virar. Este lado já está assado!'</em></p><p>Seu martírio, cheio de fé e bom humor diante da morte, converteu muitos romanos ao Cristianismo.",oracao:"São Lourenço, diácono generoso e mártir corajoso, ensinai-nos a ver nos pobres o tesouro de Cristo e a servir com alegria mesmo no sofrimento. Amém."},
+  "08-15":{emoji:"🌺",nome:"Assunção de Nossa Senhora",data:"15 de Agosto",vida:"<p>A <strong>Assunção de Maria</strong> é o dogma proclamado pelo Papa Pio XII em 1950, que define que Maria, ao fim de sua vida terrena, foi assumida ao céu em corpo e alma. É a maior festa mariana do calendário litúrgico.</p><p>Maria não conheceu a corrupção do túmulo porque foi preservada do pecado original desde sua concepção (<em>Imaculada Conceição</em>) e foi a Mãe do Filho de Deus.</p><p>A Assunção é a antecipação do que espera a todos os justos: a <strong>ressurreição da carne</strong> e a vida eterna em Deus. Maria é o sinal da esperança da Igreja.",oracao:"Nossa Senhora Assunta, que fostes elevada ao Céu em corpo e alma, levai também nossos corações para o alto, para que vivamos já aqui voltados para Deus e para a eternidade. Amém."},
+  "08-28":{emoji:"📖",nome:"Santo Agostinho, Bispo e Doutor",data:"28 de Agosto",vida:"<p><strong>Santo Agostinho</strong> (354-430) é um dos maiores gênios da história humana e Doutor da Igreja. Nasceu na África do Norte, filho de Santa Mônica — que orou por sua conversão durante <strong>17 anos.</strong></p><p>Após anos de vida dissoluta e busca pela verdade nas filosofias pagãs, converteu-se aos 32 anos, após ouvir uma voz de criança dizer: <em>'Toma e lê.'</em> Leu São Paulo e se converteu.</p><p>Sua frase mais célebre resume toda a experiência cristã: <strong>'Fizeste-nos para Ti, Senhor, e inquieto está o nosso coração, enquanto não repousa em Ti.'</strong> Seus <em>Confissões</em> são a primeira autobiografia espiritual da história.",oracao:"Santo Agostinho, que encontrastes repouso em Deus após longa busca, ajudai-nos a encontrar em Cristo a resposta para a inquietação de nossos corações. Amém."},
+  "09-08":{emoji:"🌸",nome:"Natividade de Nossa Senhora",data:"8 de Setembro",vida:"<p>A <strong>Natividade de Maria</strong> celebra o nascimento da Mãe de Deus — evento tão importante que a Igreja o comemora solenemente. Maria nasceu de <strong>Joaquim e Ana</strong>, um casal idoso e piedoso que esperava um filho por longos anos.</p><p>A tradição afirma que Joaquim e Ana, entristecidos pela esterilidade, receberam a promessa de um anjo de que teriam uma filha. Maria nasceu <em>Imaculada</em> — preservada do pecado original pela graça de Deus, em previsão dos méritos de seu Filho.</p><p>Com o nascimento de Maria, começa a história da Salvação em seu ato final. <strong>Nasce a aurora que precede o Sol de Justiça: Jesus Cristo.</strong>",oracao:"Santa Maria, cujo nascimento enchia de alegria o mundo inteiro, sede nossa mãe e intercessora e guiai-nos sempre a Jesus, vosso Filho. Amém."},
+  "09-14":{emoji:"✝️",nome:"Exaltação da Santa Cruz",data:"14 de Setembro",vida:"<p>A <strong>Exaltação da Santa Cruz</strong> celebra a Cruz de Cristo não como instrumento de derrota, mas como <em>trono de glória e símbolo de vitória.</em> A festa remonta ao século IV, quando Santa Helena, mãe do imperador Constantino, encontrou a verdadeira Cruz em Jerusalém.</p><p>Em 335, a Basílica do Santo Sepulcro foi consagrada e a Cruz foi solenemente mostrada ao povo, que se ajoelhou em adoração — origem da festa. Em 628, o imperador Heráclio recuperou a Cruz, roubada pelos persas, e a restituiu a Jerusalém.</p><p>A Cruz nos lembra que <strong>o sofrimento unido a Cristo tem valor redentor.</strong> 'Se alguém quer vir após mim... tome a sua cruz cada dia.' (Lc 9,23)",oracao:"Senhor Jesus, que morrestes na Cruz por amor a nós, ensinai-nos a abraçar nossas cruzes cotidianas com fé e esperança na ressurreição. Amém."},
+  "09-29":{emoji:"⚔️",nome:"Santos Miguel, Gabriel e Rafael",data:"29 de Setembro",vida:"<p>A <strong>festa dos Arcanjos</strong> celebra os três mensageiros de Deus revelados na Sagrada Escritura.</p><p><strong>Miguel</strong> ('Quem como Deus?') é o príncipe dos exércitos celestes, vencedor de Lúcifer, protetor da Igreja. <strong>Gabriel</strong> ('Força de Deus') anunciou a Maria a Encarnação. <strong>Rafael</strong> ('Deus cura') acompanhou Tobias em sua viagem.</p><p>Os anjos são <em>espíritos a serviço de Deus e dos homens</em>, messag eiros, guardiões e adoradores eternos do Altíssimo. A tradição diz que cada pessoa tem um <strong>anjo da guarda</strong> desde o nascimento.",oracao:"Santos Miguel, Gabriel e Rafael, messag eiros e guerreiros de Deus, protegei-nos das forças do mal, anunciai em nós a Palavra de Deus e curai nossas feridas interiores. Amém."},
+  "10-01":{emoji:"🌹",nome:"Santa Teresinha do Menino Jesus",data:"1º de Outubro",vida:"<p><strong>Santa Teresinha do Menino Jesus e da Santa Face</strong> (1873-1897) é uma das santas mais amadas da história moderna, Doutora da Igreja e padroeira das missões. Nasceu em Alençon, França, entrou no Carmelo aos 15 anos e morreu de tuberculose aos 24.</p><p>Seu legado é o chamado <em>'Caminho Pequeno'</em>: não grandes penitências, mas <strong>os pequenos atos de amor cotidiano</strong>, feitos com perfeita intenção. 'Quero passar meu Céu fazendo o bem na terra, derramando rosas.'</p><p>O Papa Pio XI a chamou de <strong>'A maior santa dos tempos modernos'</strong>. Sua autobiografia, <em>História de uma Alma</em>, vendeu milhões de cópias.",oracao:"Santa Teresinha, que amaste a Deus nos pequenos gestos do dia a dia, ensinai-nos o seu Caminho Pequeno e intercedei por nós com uma chuva de rosas. Amém."},
+  "10-04":{emoji:"🐦",nome:"São Francisco de Assis",data:"4 de Outubro",vida:"<p><strong>São Francisco de Assis</strong> (1182-1226) é um dos santos mais conhecidos e amados da história. Filho de um rico comerciante de tecidos, largou tudo — inclusive as roupas — para seguir Cristo em pobreza radical, dizendo: <em>'Deus meu e tudo meu.'</em></p><p>Fundou a Ordem dos Frades Menores, recebeu os <strong>estigmas de Cristo</strong> em 1224 — as chagas nos pés, mãos e lado — e escreveu o célebre <em>Cântico das Criaturas</em>, louvando a Deus por 'Irmão Sol, Irmã Lua e Irmã Morte.'</p><p>Pregou aos pássaros, pacificou cidades em guerra, converteu o sultão do Egito com amor. O Papa Francisco escolheu seu nome em homenagem a ele.",oracao:"São Francisco, arauto do Evangelho e amante da criação, ensinai-nos a pobreza de espírito, o amor à natureza e a paz de Cristo que vai além de toda compreensão. Amém."},
+  "10-07":{emoji:"📿",nome:"Nossa Senhora do Rosário",data:"7 de Outubro",vida:"<p>A festa de <strong>Nossa Senhora do Rosário</strong> foi instituída em memória da Batalha de Lepanto (1571), em que a frota cristã venceu os turcos otomanos após intensas rezas do Rosário por toda a Europa, a pedido do Papa São Pio V.</p><p>O Rosário é a oração preferida de Maria — ela própria o pediu em suas aparições em Lourdes, Fátima e Guadalupe. É uma <em>meditação contemplativa dos mistérios da vida de Cristo</em>, com os olhos de Maria.</p><p>São João Paulo II acrescentou os <strong>Mistérios Luminosos</strong> em 2002 e chamou o Rosário de <em>'oração da minha vida e oração mais bela.'</em>",oracao:"Nossa Senhora do Rosário, ensinai-nos a rezar com fé e perseverança o Rosário todos os dias, contemplando os mistérios da vida do vosso Filho. Amém."},
+  "10-15":{emoji:"✍️",nome:"Santa Teresa de Ávila",data:"15 de Outubro",vida:"<p><strong>Santa Teresa de Ávila</strong> (1515-1582), Doutora da Igreja, foi a primeira mulher a receber esse título (1970). Carmelita espanhola, reformou a Ordem do Carmo e fundou 17 conventos com rigidez evangélica.</p><p>Mística extraordinária, descreveu os graus da oração no <em>Castelo Interior</em> — uma das maiores obras da espiritualidade cristã. Recebeu visões, êxtases e a graça da <strong>transverberação</strong> do coração — penetrado por uma lança de fogo.</p><p>Sua espiritualidade é marcada pela alegria: <em>'Da má devoção e de santos carrancudos, livra-nos, Senhor!'</em>",oracao:"Santa Teresa, mestra da oração e reformadora da Igreja, ensinai-nos a fazer da oração o centro de nossas vidas e a buscar a Deus com alegria e perseverança. Amém."},
+  "10-28":{emoji:"⚡",nome:"Santos Simão e Judas Tadeu, Apóstolos",data:"28 de Outubro",vida:"<p><strong>São Simão</strong>, chamado o Zelota por pertencer ao grupo dos zelotes judeus, converteu-se ao seguir Jesus e encontrou na pessoa do Messias a verdadeira libertação que buscava. Evangelizou a Pérsia, onde foi martirizado.</p><p><strong>São Judas Tadeu</strong>, irmão de Tiago (o Menor), é invocado como <em>padroeiro das causas impossíveis e desesperadas.</em> Escreveu a Epístola de Judas e evangelizou a Mesopotâmia, onde morreu mártir.</p><p>Juntos, representam a diversidade de vocações na unidade do mesmo Espírito: <strong>um que buscava a libertação política, outro que intercede pelos desesperados.</strong>",oracao:"Santos Simão e Judas Tadeu, apóstolos fiéis, intercedei por nossas causas impossíveis e ensinai-nos que em Cristo tudo é possível. Amém."},
+  "11-01":{emoji:"👼",nome:"Todos os Santos",data:"1º de Novembro",vida:"<p>A <strong>Solenidade de Todos os Santos</strong> celebra toda a multidão inumerável de santos que estão na glória do Céu — os canonizados e os anônimos, os grandes e os humildes, os de todas as nações e épocas.</p><p>O Apocalipse descreve essa multidão que <em>'ninguém podia contar'</em>, vestidos de branco, com palmas nas mãos, diante do trono de Deus. <strong>Cada batizado é chamado à santidade.</strong></p><p>Esta festa nos diz que o Céu está cheio de pessoas comuns que viveram o Evangelho com fidelidade. A santidade não é para poucos eleitos, mas para todos: <em>'Esta é a vontade de Deus: a vossa santificação.'</em> (1Ts 4,3)",oracao:"Santos e santas de Deus, sede nossos intercessores e modelos. Ajudai-nos a percorrer com fidelidade o caminho da santidade que Deus traçou para cada um de nós. Amém."},
+  "11-02":{emoji:"🕯️",nome:"Todos os Fiéis Defuntos",data:"2 de Novembro",vida:"<p>O <strong>Dia de Finados</strong> é a memória litúrgica de todos os fiéis que morreram e estão em processo de purificação no Purgatório, aguardando a plena comunhão com Deus.</p><p>A doutrina do Purgatório, definida pelos Concílios de Florença e Trento, afirma que as almas que morreram em graça, mas ainda impuras, passam por uma purificação antes do Céu. <strong>Nossas orações, Missas e atos de caridade as ajudam.</strong></p><p>A comunhão entre os vivos e os mortos na fé é chamada de <em>'comunhão dos santos'</em> — os que vivem na terra, no purgatório e no céu formam uma única família em Cristo.",oracao:"Senhor, dai o descanso eterno a todas as almas que partiram deste mundo. Que a luz perpétua as ilumine e que descansem em paz. Amém."},
+  "11-11":{emoji:"⚔️",nome:"São Martinho de Tours",data:"11 de Novembro",vida:"<p><strong>São Martinho de Tours</strong> (316-397) nasceu na Panônia (atual Hungria), filho de um oficial romano. Sua história mais famosa é de quando era soldado: viu um mendigo seminu no frio e <strong>cortou sua capa ao meio para cobri-lo.</strong> Naquela noite, sonhou com Cristo vestindo aquela metade de capa.</p><p>Converteu-se, deixou o exército e tornou-se monge, fundando o primeiro mosteiro da Gália. Eleito bispo de Tours contra sua vontade, renovou profundamente o Cristianismo na França, visitando paróquias pobres a pé e a burro.</p><p>É padroeiro da França, dos soldados, dos mendigos e dos tecelões.",oracao:"São Martinho, que vistes Cristo no pobre que encontrastes na estrada, abri nossos olhos para reconhecer Jesus nos necessitados que cruzam nosso caminho. Amém."},
+  "11-21":{emoji:"🌸",nome:"Apresentação de Maria no Templo",data:"21 de Novembro",vida:"<p>A festa da <strong>Apresentação de Maria no Templo</strong> celebra a tradição segundo a qual Joaquim e Ana, cumprindo o voto feito antes do nascimento de Maria, levaram sua filha ao Templo de Jerusalém aos três anos para ser <em>consagrada a Deus.</em></p><p>Maria viveu no Templo até os doze anos, crescendo em sabedoria e santidade, preparada pelo Espírito Santo para ser a Mãe do Messias. Sua vida inteira foi um <strong>ato de consagração total a Deus.</strong></p><p>Esta festa nos convida a renovar nossa própria consagração ao Senhor, entregando-nos a Ele com a mesma totalidade de Maria.",oracao:"Maria Santíssima, que vos consagrastes a Deus desde a infância, ensinai-nos a colocar nossas vidas inteiramente nas mãos de Deus, como Vós fizestes. Amém."},
+  "11-30":{emoji:"⚓",nome:"São André, Apóstolo",data:"30 de Novembro",vida:"<p><strong>São André</strong> foi o primeiro discípulo chamado por Jesus, irmão de Simão Pedro, pescador do Mar da Galileia. Discípulo de João Batista, foi o primeiro a reconhecer Jesus como o Messias e levou seu irmão Pedro a Ele.</p><p>Evangelizou a Grécia, Ásia Menor e a Escícia (atual Ucrânia e Rússia). Morreu crucificado numa <em>cruz em forma de X</em> (daí a Cruz de Santo André, na bandeira do Reino Unido) em Patras, na Grécia, por volta de 60 d.C.</p><p>É padroeiro da Escócia, da Rússia, da Grécia e da Ucrânia.",oracao:"São André, primeiro a seguir a Cristo e a levar outros a Ele, ensinai-nos o ardor missionário e a alegria de apresentar Jesus aos que ainda não o conhecem. Amém."},
+  "12-03":{emoji:"🌏",nome:"São Francisco Xavier",data:"3 de Dezembro",vida:"<p><strong>São Francisco Xavier</strong> (1506-1552) é o maior missionário depois de São Paulo. Nasceu na Espanha, estudou em Paris onde conheceu Santo Inácio de Loyola e tornou-se um dos primeiros jesuítas.</p><p>Evangelizou a Índia, o Japão e tentou entrar na China, onde morreu na ilha de Sancião às portas do Império. Em apenas <strong>10 anos de missão</strong>, percorreu mais de 90.000 km e batizou mais de 700.000 pessoas.</p><p>Trabalhava até o esgotamento, dormindo apenas 4 horas por noite. É padroeiro das missões e dos missionários.",oracao:"São Francisco Xavier, apóstolo incansável dos povos do Oriente, inflamai-nos com o mesmo amor missionário e ajudai-nos a anunciar Cristo aonde formos. Amém."},
+  "12-08":{emoji:"✨",nome:"Imaculada Conceição de Maria",data:"8 de Dezembro",vida:"<p>A <strong>Imaculada Conceição</strong> é o dogma definido pelo Papa Pio IX em 1854, que proclama que Maria foi preservada do pecado original desde o primeiro instante de sua concepção, por graça especial de Deus, em previsão dos méritos de Jesus Cristo.</p><p>Este dogma foi confirmado pelas aparições de Nossa Senhora a <strong>Santa Bernadete Soubirous</strong> em Lourdes (1858): quando a menina perguntou quem era, a Virgem respondeu: <em>'Eu sou a Imaculada Conceição.'</em></p><p>A Imaculada Conceição é o começo da obra da Redenção: Deus prepara o vaso mais puro para receber o Salvador do mundo.",oracao:"Maria Imaculada, cheia de graça desde a concepção, sede nossa mãe, intercessora e modelo de pureza. Ajudai-nos a guardar nossos corações limpos para Deus. Amém."},
+  "12-12":{emoji:"🌹",nome:"Nossa Senhora de Guadalupe",data:"12 de Dezembro",vida:"<p>Em <strong>1531</strong>, a Virgem Maria apareceu quatro vezes ao índio Juan Diego no monte Tepeyac, no México. Apresentou-se como <em>'A sempre Virgem Santa Maria, Mãe do verdadeiro Deus'</em> e pediu a construção de uma igreja.</p><p>Como prova, fez brotar rosas no inverno e imprimiu milagrosamente sua imagem no manto (tilma) de Juan Diego — imagem que continua intacta e inexplicável até hoje após 490 anos, sendo estudada por cientistas do mundo inteiro.</p><p>As aparições de Guadalupe levaram à conversão de <strong>8 milhões de índios</strong> em poucos anos. Nossa Senhora de Guadalupe é padroeira das Américas.",oracao:"Nossa Senhora de Guadalupe, mãe dos povos das Américas, protegei nosso continente, fortalecei a fé dos que sofrem e sede sinal de esperança para todos. Amém."},
+  "12-25":{emoji:"⭐",nome:"Natividade do Senhor",data:"25 de Dezembro",vida:"<p>O <strong>Natal</strong> celebra o maior mistério da história: o Filho eterno de Deus nasce como homem em Belém da Judeia. <em>'O Verbo se fez carne e habitou entre nós.'</em> (Jo 1,14) Deus entra na história para salvá-la de dentro.</p><p>Jesus nasce pobre, numa manjedoura, envolvido em faixas — imagem da Cruz que o aguardava. Os pastores, os pobres e os simples, são os primeiros a recebê-Lo. Os Reis Magos representam todos os povos da terra vindo adorar o Salvador.</p><p><strong>O Natal é a festa do amor de Deus que não suporta a distância e vem habitar conosco.</strong> 'Deus se fez homem para que o homem se fizesse Deus.' (Santo Atanásio)",oracao:"Jesus Menino, que nascestes pobre em Belém por amor a nós, ensinai-nos a receber-Vos em nossos corações todos os dias, servindo-Vos nos pobres e nos pequenos. Amém."},
+  "12-26":{emoji:"🌟",nome:"São Estêvão, Primeiro Mártir",data:"26 de Dezembro",vida:"<p><strong>São Estêvão</strong> foi o primeiro mártir cristão (proto-mártir), um dos sete primeiros diáconos escolhidos pelos Apóstolos. O Livro dos Atos descreve-o como <em>'cheio de graça e poder'</em>, realizando sinais e prodígios.</p><p>Preso e levado ao tribunal, fez o mais longo discurso do Novo Testamento, resumindo toda a história da salvação. Condenado à lapidação, ao morrer viu os céus abertos e exclamou: <strong>'Vejo o Filho do Homem de pé à direita de Deus!'</strong></p><p>No momento da morte, orou pelos seus algozes: <em>'Senhor, não lhes imputeis este pecado!'</em> — entre eles estava Saulo de Tarso, futuro São Paulo.",oracao:"São Estêvão, primeiro a dar a vida por Cristo, ensinai-nos a perdoar os que nos perseguem e a testemunhar a fé com coragem e alegria. Amém."},
+  "12-27":{emoji:"❤️",nome:"São João, Apóstolo e Evangelista",data:"27 de Dezembro",vida:"<p><strong>São João</strong>, filho de Zebedeu, é 'o discípulo amado' — o único apóstolo que não fugiu no momento da Paixão e permaneceu ao pé da Cruz com Maria. Jesus lhe confiou sua própria Mãe: <em>'Mulher, eis o teu filho. João, eis a tua mãe.'</em></p><p>Escreveu o quarto Evangelho, as três Epístolas de João e o Apocalipse. Toda a sua mensagem se resume em uma frase: <strong>'Deus é amor.'</strong> Conta a tradição que, nos seus últimos anos em Éfeso, repetia incansavelmente: <em>'Filhinhos, amai-vos uns aos outros.'</em></p><p>É o único apóstolo que não morreu mártir, falecendo de velhice em Éfeso — mas não por falta de coragem: sobreviveu milagrosamente a ser jogado em óleo fervente.",oracao:"São João, apóstolo do amor e evangelista do Verbo, ensinai-nos a permanecer junto à Cruz com Maria e a viver da caridade que é o coração do Evangelho. Amém."},
+  "12-28":{emoji:"👶",nome:"Santos Inocentes Mártires",data:"28 de Dezembro",vida:"<p>Os <strong>Santos Inocentes</strong> são os meninos de até dois anos que o rei Herodes mandou matar em Belém e arredores, na tentativa de eliminar o recém-nascido 'Rei dos Judeus'. O Evangelho de Mateus cita o cumprimento da profecia de Jeremias: <em>'Ouviu-se uma voz em Ramá, um choro e um lamento grande: é Raquel que chora seus filhos.'</em></p><p>Estas crianças são chamadas de <strong>'flores dos mártires'</strong>, pois morreram pelo Cristo que ainda não podiam confessar com palavras, mas derramaram seu sangue por Ele.</p><p>São os patronos das crianças, das vítimas inocentes e do direito à vida — uma mensagem profética para nossos dias.",oracao:"Santos Inocentes, flores do martírio, intercedei pelas crianças do mundo inteiro, especialmente as vítimas da violência e do aborto. Amém."}
+};
+
+function getSantoDia(){
+  var d = new Date();
+  var key = String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  return SANTOS[key] || {
+    emoji:'✝️',
+    nome:'Santo do Dia',
+    data: d.getDate() + ' de ' + ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][d.getMonth()],
+    vida:'<p>A Igreja celebra hoje um santo que nos convida a imitar as virtudes de Cristo em nossa vida cotidiana. <strong>Cada dia é uma oportunidade de crescer na santidade</strong>, seguindo o exemplo dos que nos precederam na fé.</p><p>Como dizia São João Paulo II: <em>"Não tenhais medo de ser santos! A santidade não é luxo de poucos, mas dever de todos."</em></p>',
+    oracao:'Santos e santas de Deus, intercedei por nós e ajudai-nos a caminhar na santidade a que todos somos chamados. Amém.'
+  };
+}
+
+function renderSanto(){
+  var s = getSantoDia();
+  var html = '<div class="santo-box">';
+  html += '<span class="santo-emoji">'+s.emoji+'</span>';
+  html += '<div class="santo-nome">'+s.nome+'</div>';
+  html += '<div class="santo-data">✦  '+s.data+'  ✦</div>';
+  html += '<div class="santo-div"><span>✦</span></div>';
+  html += '<div class="santo-vida">'+s.vida+'</div>';
+  html += '<div class="santo-oracao"><p>'+s.oracao+'</p></div>';
+  html += '</div>';
+  // Botão compartilhar o santo
+  html += '<div class="wbtn" onclick="compartilharSanto()" style="margin-top:0"><span style="font-size:20px">💬</span><span>Compartilhar o Santo do Dia</span></div>';
+  html += '<div class="ftr"><p>✦  ✝  FIDES MISSA  ✝  ✦</p><small>Diác. Rômulo Guerra</small></div>';
+  document.getElementById('santoContainer').innerHTML = html;
+  document.getElementById('santoNomeHeader').textContent = s.nome;
+}
+
+function compartilharSanto(){
+  var s = getSantoDia();
+  var txt = '✝️ *FIDES MISSA — SANTO DO DIA* ✝️\n\n';
+  txt += s.emoji+' *'+s.nome+'*\n📅 '+s.data+'\n\n';
+  txt += s.vida.replace(/<[^>]+>/g,'').replace(/\n\n/g,'\n').trim();
+  txt += '\n\n🙏 *Oração:*\n_'+s.oracao+'_\n\n_— Diác. Rômulo Guerra_\n_App: Fides Missa_';
+  if(navigator.share) navigator.share({title:'Santo do Dia — '+s.nome, text:txt});
+  else { var u='https://wa.me/?text='+encodeURIComponent(txt); window.open(u,'_blank'); }
+}
+
+// ── TEMPO LITÚRGICO ────────────────────────────────────────────
+function tempoLit(ano,mes,dia){
+  var d=new Date(ano,mes,dia);
+  var a=ano%19,b=Math.floor(ano/100),c=ano%100,e=Math.floor(b/4),f=b%4,g=Math.floor((b+8)/25),h=Math.floor((b-g+1)/3),i=Math.floor(19*a+b-e-h+15)%30,k=Math.floor(c/4),l=c%4,m=Math.floor(32+2*f+2*k-i-l)%7,n=Math.floor((a+11*i+22*m)/451),mp=Math.floor((i+m-7*n+114)/31),dp=((i+m-7*n+114)%31)+1;
+  var pascoa=new Date(ano,mp-1,dp);
+  var dp2=Math.round((d-pascoa)/(864e5));
+  var natal=new Date(ano,11,25); var dn=Math.round((d-natal)/(864e5));
+  var adv=new Date(ano,11,25); while(adv.getDay()!==0)adv.setDate(adv.getDate()-1); adv.setDate(adv.getDate()-21); var da=Math.round((d-adv)/(864e5));
+  var qua=new Date(pascoa); qua.setDate(qua.getDate()-46); var dq=Math.round((d-qua)/(864e5));
+  var pent=new Date(pascoa); pent.setDate(pent.getDate()+49); var dpent=Math.round((d-pent)/(864e5));
+  if(mes===11&&(dia===25||dia===26||dia===27||dia===28||dia===29||dia===30||dia===31)||mes===0&&dia<=6) return {n:'Tempo do Natal',c:'cv',css:'#F5F0E8',dot:'cb'};
+  if(da>=0&&dn<0) return {n:'Advento',c:'crx',css:'#9C27B0',dot:'crx'};
+  if(dn>=0&&dn<=12) return {n:'Tempo do Natal',c:'cb',css:'#F5F0E8',dot:'cb'};
+  if(dq>=0&&dp2<0) return {n:'Quaresma',c:'crx',css:'#9C27B0',dot:'crx'};
+  if(dp2>=0&&dp2<=49) return {n:'Tempo Pascal',c:'cb',css:'#F5F0E8',dot:'cb'};
+  if(dpent===0) return {n:'Pentecostes',c:'cvm',css:'#F44336',dot:'cvm'};
+  return {n:'Tempo Comum',c:'cv',css:'#4CAF50',dot:'cv'};
+}
+
+// ── CALENDÁRIO ────────────────────────────────────────────────
+var MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+var DIAS_S=['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+var calAno=new Date().getFullYear(), calMes=new Date().getMonth();
+var calSel={a:new Date().getFullYear(),m:new Date().getMonth(),d:new Date().getDate()};
+
+function renderCal(){
+  var hoje=new Date();
+  document.getElementById('calTit').textContent=MESES[calMes]+' '+calAno;
+  var t=tempoLit(calAno,calMes,15);
+  document.getElementById('calCor').className='calcor '+t.dot;
+  document.getElementById('calTempo').textContent=t.n;
+  var g=document.getElementById('calGrid'); g.innerHTML='';
+  var prim=new Date(calAno,calMes,1).getDay();
+  var dias=new Date(calAno,calMes+1,0).getDate();
+  for(var i=0;i<prim;i++){var v=document.createElement('div');v.className='calday empty';g.appendChild(v);}
+  for(var d=1;d<=dias;d++){
+    var cell=document.createElement('div');
+    var ds=new Date(calAno,calMes,d).getDay();
+    var td=tempoLit(calAno,calMes,d);
+    var cl=['calday','tem'];
+    if(ds===0)cl.push('dom');
+    if(calAno===hoje.getFullYear()&&calMes===hoje.getMonth()&&d===hoje.getDate())cl.push('hoje');
+    if(calAno===calSel.a&&calMes===calSel.m&&d===calSel.d)cl.push('sel');
+    cell.className=cl.join(' ');
+    cell.innerHTML='<div class="calnum">'+d+'</div><div class="caldot '+td.dot+'" style="opacity:1"></div>';
+    cell.onclick=(function(dd){return function(){calSel={a:calAno,m:calMes,d:dd};renderCal();}})(d);
+    g.appendChild(cell);
+  }
+  // Info dia selecionado
+  var ds2=new Date(calSel.a,calSel.m,calSel.d);
+  var te=tempoLit(calSel.a,calSel.m,calSel.d);
+  var eHoje=ds2.toDateString()===hoje.toDateString();
+  document.getElementById('calDiaTit').textContent=(eHoje?'Hoje — ':'')+DIAS_S[ds2.getDay()];
+  document.getElementById('calDiaDat').textContent=calSel.d+' de '+MESES[calSel.m]+' de '+calSel.a;
+  document.getElementById('calDiaCor').className='calcor '+te.dot;
+  document.getElementById('calDiaTempo').textContent=te.n;
+  // Santo do dia
+  var sk=String(calSel.m+1).padStart(2,'0')+'-'+String(calSel.d).padStart(2,'0');
+  var santo=SANTOS[sk];
+  document.getElementById('calDiaSanto').textContent=santo?'😇 '+santo.nome:'';
+}
+function calNav(d){calMes+=d;if(calMes>11){calMes=0;calAno++;}if(calMes<0){calMes=11;calAno--;}renderCal();}
+function irMissa(){aba(0,document.querySelectorAll('.tab')[0]);mostrarToast('✝ Liturgia do dia!');}
+
+// ── TABS ──────────────────────────────────────────────────────
+function aba(idx,el){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});
+  el.classList.add('active');
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
+  document.getElementById('s'+idx).classList.add('active');
+  document.querySelector('.content').scrollTo(0,0);
+  if(idx===1) renderSanto();
+  if(idx===2) renderCal();
+}
+
+// ── TEMA ──────────────────────────────────────────────────────
+var temaClaro=localStorage.getItem('fides_tema')==='claro';
+function aplicarTema(){document.body.classList.toggle('light',temaClaro);document.getElementById('themeBtn').textContent=temaClaro?'🌙':'☀️';}
+function alternarTema(){temaClaro=!temaClaro;localStorage.setItem('fides_tema',temaClaro?'claro':'escuro');aplicarTema();mostrarToast(temaClaro?'☀️ Modo claro':'🌙 Modo escuro');}
+aplicarTema();
+
+// ── FONTE ─────────────────────────────────────────────────────
+var fs=parseInt(localStorage.getItem('fides_fs')||'15');
+function aplicarFonte(){document.documentElement.style.setProperty('--fs',fs+'px');document.getElementById('fval').textContent=fs;localStorage.setItem('fides_fs',fs);}
+function mudarFonte(d){fs=Math.min(22,Math.max(11,fs+d));aplicarFonte();}
+aplicarFonte();
+
+// ── DATA ──────────────────────────────────────────────────────
+(function(){var d=new Date();document.getElementById('dataHoje').textContent=DIAS_S[d.getDay()]+', '+d.getDate()+' de '+MESES[d.getMonth()]+' de '+d.getFullYear();})();
+
+// ── REFLEXÃO ──────────────────────────────────────────────────
+var editando=false,reflexao=localStorage.getItem('fides_ref_'+new Date().toISOString().slice(0,10))||'';
+(function(){if(reflexao){var t=document.getElementById('rTxt');t.textContent=reflexao;t.style.color='var(--text)';t.style.fontStyle='normal';}})();
+function toggleRef(){
+  editando=!editando;
+  var btn=document.getElementById('editBtn'),area=document.getElementById('rArea'),txt=document.getElementById('rTxt');
+  if(editando){btn.textContent='Salvar';area.style.display='block';area.value=reflexao;txt.style.display='none';area.focus();}
+  else{reflexao=area.value;localStorage.setItem('fides_ref_'+new Date().toISOString().slice(0,10),reflexao);btn.textContent='Editar';area.style.display='none';txt.style.display='block';txt.textContent=reflexao||'Toque em "Editar" para escrever sua reflexão pessoal.';txt.style.color=reflexao?'var(--text)':'var(--text2)';txt.style.fontStyle=reflexao?'normal':'italic';mostrarToast('✝ Reflexão salva!');}
+}
+
+// ── COMPARTILHAR ──────────────────────────────────────────────
+function gerarTexto(){
+  var d=document.getElementById('dataHoje').textContent;
+
+  // Pegar texto do evangelho do DOM (sem tags HTML)
+  var evEl=document.getElementById('t-ev');
+  var evTxt=evEl?evEl.innerText||evEl.textContent:'';
+  evTxt=evTxt.replace(/\s+/g,' ').trim();
+
+  // Resumo: pegar só as primeiras 300 letras do evangelho
+  var resumo=evTxt.length>300?evTxt.substring(0,300)+'...':evTxt;
+
+  var txt='';
+  txt+='✝️ *FIDES MISSA* ✝️\n';
+  txt+='_'+d+'_\n\n';
+  txt+='*⭐ SANTO EVANGELHO*\n';
+  txt+='\"'+resumo+'\"\n';
+  txt+='_— Palavra da Salvação._\n';
+
+  if(reflexao){
+    txt+='\n*💭 MINHA REFLEXÃO:*\n';
+    txt+=reflexao+'\n';
+  }
+
+  txt+='\n📖 *Leia a liturgia completa:*\n';
+  txt+='https://fidesmissa.netlify.app\n';
+  txt+='\n_✝ FIDES MISSA — Palavra da Salvação_';
+  return txt;
+}
+function compartilharWpp(){window.open('https://wa.me/?text='+encodeURIComponent(gerarTexto()),'_blank');}
+function compartilharGeral(){if(navigator.share)navigator.share({title:'Fides Missa ✝️',text:gerarTexto()});else navigator.clipboard.writeText(gerarTexto()).then(function(){mostrarToast('📋 Copiado!')});}
+function pedirNotif(){if(!('Notification' in window)){mostrarToast('Não suportado.');return;}Notification.requestPermission().then(function(p){mostrarToast(p==='granted'?'🔔 Notificações ativadas!':'Permissão negada.');});}
+
+// ── TOAST ─────────────────────────────────────────────────────
+// Inicializar
+renderSanto();
+
+function mostrarToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},3000);}
+</script>
+</body>
+</html>
